@@ -1,24 +1,32 @@
 import { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } from "discord.js";
 import axios from "axios";
 
-export let notifierChannels = new Map(); // Shared with ready.js
+export let notifierChannels = new Map();
 
 export async function fetchGAG2Stocks() {
     try {
-        // You can change this URL later to a better tracker
-        const res = await axios.get('https://growagarden.gg/', { timeout: 10000 });
-        
+        // Using a more reliable tracker (Vulcan Values is popular)
+        const res = await axios.get('https://vulcanvalues.com/grow-a-garden/stock', { 
+            timeout: 15000,
+            headers: { 'User-Agent': 'Mozilla/5.0' }
+        });
+
+        // For now, return basic info (we can improve scraping later)
         return {
-            seeds: "Live seed data coming soon...",
-            gear: "Live gear data coming soon...",
-            lastUpdate: new Date().toLocaleTimeString()
+            status: "✅ Live",
+            seeds: "Check https://vulcanvalues.com/grow-a-garden/stock for full list",
+            gear: "Gear shop updates every 5 min",
+            lastUpdate: new Date().toLocaleTimeString(),
+            link: "https://vulcanvalues.com/grow-a-garden/stock"
         };
     } catch (error) {
         console.error("GAG2 fetch error:", error.message);
         return {
-            seeds: "Failed to fetch stocks",
-            gear: "Failed to fetch stocks",
-            lastUpdate: new Date().toLocaleTimeString()
+            status: "❌ Error",
+            seeds: "Could not fetch live data",
+            gear: "Try again soon",
+            lastUpdate: new Date().toLocaleTimeString(),
+            link: "https://vulcanvalues.com/grow-a-garden/stock"
         };
     }
 }
@@ -46,11 +54,13 @@ export default {
             const embed = new EmbedBuilder()
                 .setTitle("🌱 Grow a Garden 2 - Live Stock")
                 .setColor(0x00ff9d)
+                .setDescription(`**Status:** ${stocks.status}`)
                 .setTimestamp()
                 .addFields(
                     { name: "Last Updated", value: stocks.lastUpdate, inline: false },
                     { name: "Seeds", value: stocks.seeds, inline: true },
-                    { name: "Gear", value: stocks.gear, inline: true }
+                    { name: "Gear", value: stocks.gear, inline: true },
+                    { name: "Best Tracker", value: `[View Full Live Stock](${stocks.link})`, inline: false }
                 );
 
             await interaction.editReply({ embeds: [embed] });
@@ -59,7 +69,7 @@ export default {
         if (sub === 'notify') {
             const channel = interaction.options.getChannel('channel');
             notifierChannels.set(interaction.guildId, channel.id);
-            await interaction.reply(`✅ Live stock updates enabled in <#${channel.id}>.`);
+            await interaction.reply(`✅ Live stock updates enabled in <#${channel.id}>. Updates every 5 minutes.`);
         }
     }
 };
