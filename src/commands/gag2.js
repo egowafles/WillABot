@@ -1,33 +1,29 @@
-const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require('discord.js');
-const axios = require('axios');
-const cheerio = require('cheerio');
-const cron = require('node-cron');
+import { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } from "discord.js";
+import axios from "axios";
+import cron from "node-cron";
 
-let stockCache = { lastUpdate: null, data: null };
-let notifierChannels = new Map(); // guildId -> channelId
+export let notifierChannels = new Map(); // Shared with ready.js
 
-async function fetchGAG2Stocks() {
+export async function fetchGAG2Stocks() {
     try {
-        // Current best public tracker (change if needed)
-        const res = await axios.get('https://cocajola.com/grow-a-garden-stock-predictor/', { timeout: 10000 });
-        const $ = cheerio.load(res.data);
-
-        // Placeholder - update selectors when you check the site
-        const stocks = {
-            seeds: "Check site for latest seeds",
-            gear: "Check site for latest gear",
+        const res = await axios.get('https://growagarden.gg/', { timeout: 10000 });
+        // TODO: Improve scraper later
+        return {
+            seeds: "Use /gag2 stocks for live data",
+            gear: "Shop data loading...",
             lastUpdate: new Date().toLocaleTimeString()
         };
-
-        stockCache = { lastUpdate: Date.now(), data: stocks };
-        return stocks;
     } catch (error) {
         console.error("GAG2 fetch error:", error.message);
-        return { seeds: "Failed to fetch", gear: "Failed to fetch", lastUpdate: new Date().toLocaleTimeString() };
+        return {
+            seeds: "Failed to fetch",
+            gear: "Failed to fetch",
+            lastUpdate: new Date().toLocaleTimeString()
+        };
     }
 }
 
-module.exports = {
+export default {
     data: new SlashCommandBuilder()
         .setName('gag2')
         .setDescription('Grow a Garden 2 Stock Tools')
