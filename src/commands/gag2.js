@@ -1,23 +1,23 @@
 import { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } from "discord.js";
 import axios from "axios";
-import cron from "node-cron";
 
 export let notifierChannels = new Map(); // Shared with ready.js
 
 export async function fetchGAG2Stocks() {
     try {
+        // You can change this URL later to a better tracker
         const res = await axios.get('https://growagarden.gg/', { timeout: 10000 });
-        // TODO: Improve scraper later
+        
         return {
-            seeds: "Use /gag2 stocks for live data",
-            gear: "Shop data loading...",
+            seeds: "Live seed data coming soon...",
+            gear: "Live gear data coming soon...",
             lastUpdate: new Date().toLocaleTimeString()
         };
     } catch (error) {
         console.error("GAG2 fetch error:", error.message);
         return {
-            seeds: "Failed to fetch",
-            gear: "Failed to fetch",
+            seeds: "Failed to fetch stocks",
+            gear: "Failed to fetch stocks",
             lastUpdate: new Date().toLocaleTimeString()
         };
     }
