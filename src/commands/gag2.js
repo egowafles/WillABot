@@ -1,6 +1,6 @@
 import { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } from "discord.js";
 import axios from 'axios';
-import cheerio from 'cheerio';
+import * as cheerio from 'cheerio';   // <-- Fixed import (this is the key)
 import { logger } from '../utils/logger.js';
 
 export let notifierChannels = new Map(); // guildId -> channelId
@@ -42,15 +42,15 @@ async function fetchGAG2Stocks() {
 
     lastStockData = stock;
     lastFetchTime = now;
-    logger.info(`[GAG2] Stock fetched - ${stock.seeds.split('\n').length} seeds, ${stock.gear.split('\n').length} gear`);
+    logger.info(`[GAG2] Stock fetched successfully`);
     return stock;
 
   } catch (error) {
     logger.error(`[GAG2] Fetch failed: ${error.message}`);
     return lastStockData || {
-      status: "⚠️ Error / Cached",
-      gear: "Fetch failed",
-      seeds: "Fetch failed",
+      status: "⚠️ Error",
+      gear: "Fetch failed - try again",
+      seeds: "Fetch failed - try again",
       lastUpdate: new Date().toLocaleString()
     };
   }
@@ -58,8 +58,6 @@ async function fetchGAG2Stocks() {
 
 export async function startGAG2Notifier(client) {
   logger.info('✅ GAG2 Stock monitor service started');
-  // Optional: Add cron here if you want background change detection
-  // For now the command + notify subcommand is enough
 }
 
 export default {
@@ -101,7 +99,7 @@ export default {
 
     if (sub === 'notify') {
       const channel = interaction.options.getChannel('channel');
-      if (!channel?.isTextBased()) {
+      if (!channel?.isTextBased?.()) {
         return interaction.reply({ content: "❌ Select a text channel.", ephemeral: true });
       }
       notifierChannels.set(interaction.guildId, channel.id);
